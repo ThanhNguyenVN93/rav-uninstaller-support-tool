@@ -1,0 +1,23 @@
+# Tim thu muc con sot
+$Targets = @(
+    "C:\Program Files",
+    "C:\Program Files (x86)",
+    "C:\ProgramData",
+    "$env:LOCALAPPDATA",
+    "$env:APPDATA",
+    "$env:TEMP"
+)
+
+Get-ChildItem -Path $Targets -Directory -Recurse -Depth 2 -ErrorAction SilentlyContinue | 
+Where-Object { $_.Name -match "Reason|RAV" } | 
+Select-Object FullName, LastWriteTime
+
+# Kiểm tra file driver (.sys) còn sót
+Get-ChildItem "C:\Windows\System32\drivers" -Filter "*rs*" -ErrorAction SilentlyContinue | 
+Where-Object { $_.VersionInfo.CompanyName -match "Reason" } | Select-Object FullName
+
+# Kiểm tra Scheduled Tasks còn sót
+Get-ScheduledTask | Where-Object { $_.TaskName -match "RAV|Reason" -or $_.TaskPath -match "RAV|Reason" } |
+ Select-Object TaskName, TaskPath, State
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
